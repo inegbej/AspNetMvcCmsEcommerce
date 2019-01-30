@@ -14,6 +14,12 @@
 # cmsshopping cartspecific files
 *.sln
 CmsShoppingCart.csproj
+Web.config
+Web.Debug.config
+Web.Release.config
+package.config
+/Images
+
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
