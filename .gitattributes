@@ -1,4 +1,4 @@
-# Ignore javaScript
+
 *.js linguist-vendored
 
 *.cs linguist-language=C#
