@@ -1,0 +1,109 @@
+﻿@model IEnumerable<CmsShoppingCart.Models.ViewModels.Cart.CartVM>
+
+@{
+    ViewBag.Title = "Cart Details";
+}
+
+<h2>Cart Details</h2>
+
+<!--Check if data is in the ViewBag for cart and Display it with product in the cart-->
+@if (ViewBag.Message != null)
+{
+    <h3>@ViewBag.Message</h3>
+}
+else
+{
+    <table class="table">
+        <tr>
+            <th> Name </th>
+            <th> Quantity </th>
+            <th> Price  </th>
+            <th> Image </th>
+            <th></th>
+            <th> Total </th>
+            <th></th>
+        </tr>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductName)
+                </td>
+                <td class="qty@(item.ProductId)">
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    $@Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    <img src="/Images/Uploads/Products/@item.ProductId/Thumbs/@item.Image" />
+                </td>
+                <td>
+                    <a href="#" class="incrproduct" data-id="@item.ProductId">+</a>
+                    <a href="#" class="decrproduct" data-id="@item.ProductId">-</a>
+                    <a href="#" class="removeproduct" data-id="@item.ProductId">Remove</a>
+                </td>
+                <td class="total@(item.ProductId)">
+                    @Html.DisplayFor(modelItem => item.Total)
+                </td>
+            </tr>
+        }
+
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="grandtotal"><b>Grand total</b> $<span>@ViewBag.GrandTotal</span></td>
+        </tr>
+
+    </table>
+
+}
+
+
+
+@section Scripts {
+
+    <script>
+
+        $(function () {
+
+            /*
+             * Increment Product
+             */
+            $("a.incrproduct").click(function (e) {
+                e.preventDefault();
+
+                var productId = $(this).data("Id");
+                var url = "/cart/IncrementProduct";    // API
+
+                $.getJSON(url, { productId: productId }, function (data) {
+
+                    $("td.qty" + productId).html(data.qty);
+
+                    var price = data.qty * data.price;
+                    var priceHtml = "$" + price.toFixed(2);
+
+                    $("td.total" + productId).html(priceHtml);
+
+                    var gt = parseFloat($("td.grandtotal span").text())
+                    var grandtotal = (gt + data.price).toFixed(2);
+
+                    $("td.grandtotal span").text(grandtotal);
+
+                });
+
+            });
+
+            /////////////////////////////////////////////////////////////////
+
+            
+
+        });
+
+    </script>
+
+}

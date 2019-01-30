@@ -1,0 +1,27 @@
+
+
+The Five SOLID Principles
+SOLID is an acronym. 
+1) The S stands for the Single Responsibility Principle, which states that every class should have a single responsibility. 
+    
+   The Single Responsibility Principle tells us that a class should only have a single responsibility, but how do we define what a responsibility is? We define a responsibility as a reason to change. So another way to put the Single Responsibility Principle is to say that a class should have only one reason to change. Our concern here is really Separation of concerns.
+Another way to put this is to say that each class should do one thing and do it well.
+
+2) The O stands for the Open Closed principle, which states that a class should be open for extensibility, but closed for modification. 
+3) The L is the Liskov Substitution Principle, which states how polymorphism should work. 
+4) The I is the Interface Segregation Principle, which describes how interfaces should be designed. 
+
+   the Interface Segregation Principle states that clients should not be forced to depend on methods they do not use.
+
+
+5) And finally, the D is the Dependency Inversion Principle, which describes the relationship between abstractions and concrete types.
+
+   The Dependency Inversion Principle, which states that high-level modules should not depend on low-level modules, both should depend on abstractions. And also, abstractions should not depend upon details, details should depend upon abstractions.
+
+Summary
+SOLID is a set of five principles. 
+1) The Single Responsibility Principle, which tells us that a class should only have a single responsibility, which means it should only have a single reason to change; 
+2) the Open Closed Principle, which tells us that a class should be open for extensibility, but closed for modification; 
+3) the Liskov Substitution Principle, which tells us how polymorphism should work, that it should be possible to change an implementation of an interface without changing the correctness of the system; 
+4) the Interface Segregation Principle, which says that clients should own the interface that they consume, and they should only depend on methods that they use; 
+5) and finally, the Dependency Inversion Principle, which states that abstractions should not depend on details, but details should depend on abstractions.

@@ -1,0 +1,233 @@
+﻿@model IEnumerable<CmsShoppingCart.Models.ViewModels.Shop.CategoryVM>
+
+@{
+    ViewBag.Title = "Categories";
+}
+
+<h2>Categories</h2>
+
+<div class="new-cat">
+    <input type="text" id="newcatname" />
+    <p>
+        <a href="#" id="newcata">Add a new category</a>
+        <span class="ajax-text">
+            <img src="~/Content/img/ajax-loader.gif" />
+        </span>
+    </p>
+</div>
+
+
+@if (!Model.Any())
+{
+    <h1 class="text-center">There are no categories</h1>
+}
+else
+{
+    <table class="table sorting categories" id="pages">
+        <tr class="home">
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr id="id_@item.Id">
+                <td>
+                    <div class="ajaxdivtd"></div>
+                    @Html.EditorFor(modelItem => item.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                </td>
+                <td>
+                    @Html.ActionLink("Delete", "DeleteCategory", new { id = item.Id }, new { @class = "delete" })
+                </td>
+            </tr>
+        }
+
+    </table>
+}
+
+
+@section Scripts {
+
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+    <script>
+
+        $(function () {
+
+           /* 
+            * Add New Category: Dynamically add/Delete category to the grid without a refresh using jquery/ajax
+            */
+            var newCatA = $("a#newcata");             // Add Category link
+            var newCatTextInput = $("#newcatname");   // textbox control
+            var ajaxText = $("span.ajax-text");       // image tags
+            var table = $("table#pages tbody");       // table grid
+
+            newCatTextInput.keyup(function (e) {
+                if (e.keyCode == 13) {                // enter - i.e if user press the enter key on the textbox in the UI
+                    newCatA.click();                  // call the click event  using the "Add a new category link button"
+                }
+            });
+
+            newCatA.click(function (e) {
+                e.preventDefault();                   // prevent browser normal click
+
+                var catName = newCatTextInput.val();  // get textbox value
+
+                if (catName.length < 2) {
+                    alert("Category name must be at least 2 characters long");
+                    return false;
+                }
+
+                ajaxText.show();                      // show the span tag with images inside it
+
+                var url = "/admin/shop/AddNewCategory";   // POST to API. 
+
+                // Ajax POST call with an object passed in. A function is then executed with data passed into it.
+                $.post(url, { catName: catName }, function (data) {
+
+                    var response = data.trim();
+
+                    if (response == "titletaken") {
+                        ajaxText.html("<span class='alert alert-danger'>That title is taken! </span>");
+
+                        // fadeout after 2 seconds and reset the content of the ajaxdText
+                        setTimeout(function () {
+                            ajaxText.fadeOut("fast", function () {
+                                ajaxText.html("<img src=/Content/img/ajax-loader.gif />");
+                            });
+                        }, 2000);
+                        return false;
+                    } else {
+                        if (!$("table#pages").length) {     //ensure a table exist otherwise
+                            location.reload();              // reload the current page
+                        } else {
+
+                            ajaxText.html("<span class='alert alert-success'>The category has been added! </span>");
+
+                            // fadeout after 2 seconds and reset the content of the ajaxdText
+                            setTimeout(function () {
+                                ajaxText.fadeOut("fast", function () {
+                                    ajaxText.html("<img src=/Content/img/ajax-loader.gif />");
+                                });
+                            }, 2000);
+
+                            // reset the value of the textbox
+                            newCatTextInput.val("");
+
+                            var toAppend = $("table#pages tbody tr:last").clone();   // make a copy of the last tr in the table. 
+
+                            // Change it attribute and append it to the table        
+                            toAppend.attr("id", "id_" + data);                       // id of the newly inserted category
+                            toAppend.find("#item_Name").val(catName);                // value of the newly inserted category 
+                            toAppend.find("a.delete").attr("href", "admin/shop/DeleteCategory/" + data); // append delete link to newly added tr
+                            table.append(toAppend);                                  // append it to the table
+                            table.sortable("refresh");                               // ensure the data is sorted
+                        }
+                    }
+
+                });
+            });
+
+
+            /////////////////////////////////////////////////////////////////
+
+
+            /* 
+             * Reorder Categories. To allow the Grid on the UI to be reorder by the user
+             */
+            $("table#pages tbody").sortable({
+                items: "tr:not(.home)",
+                placeholder: "ui-state-highlight",
+                update: function () {
+                    var ids = $("table#pages tbody").sortable("serialize");
+                    //console.log(ids);    // test
+                    var url = "/Admin/Shop/ReorderCategories";         // API
+
+                    $.post(url, ids, function (data) {
+                        // will not do anything
+                    });
+                }
+            });
+
+
+            /////////////////////////////////////////////////////////////////
+
+
+            /*
+             * Confirm Category deletion. To help catch dynamically added anchor, do the below
+             */
+            $("body").on("click","a.delete", function () {
+                if (!confirm("Confirm Category deletion")) return false;
+            });
+
+
+            /////////////////////////////////////////////////////////////////
+
+
+            /*
+             * Rename Category. To allow a textbox become editable when a user clicks on it on the UI
+             */
+            var originalTextBoxValue;
+
+            $("table#pages input.text-box").dblclick(function () {
+                originalTextBoxValue = $(this).val();              // the value of this textbox - table#pages input.text-box
+                $(this).attr("readonly", false);                   // sets its readonly to false, now its editable
+            });
+
+            $("table#pages input.text-box").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    $(this).blur();
+                }
+            });
+
+            // catch the blur effect
+            $("table#pages input.text-box").blur(function () {
+                var $this = $(this);                                  // $this referes to - "table#pages input.text-box"
+                var ajaxdiv = $this.parent().find(".ajaxdivtd");
+                var newCatName = $this.val();
+                var id = $this.parent().parent().attr("id").substring(3);
+                var url = "/Admin/Shop/RenameCategory";                   // API
+
+                if (newCatName.length < 2) {
+                    alert("Category name must be at least 2 characters long");
+                    $(this).attr("readonly", true);
+                    return false;
+                }
+                                
+                // Ajax POST call with a url, an object with 2 properties passed in and an anonymouse function. The function is then executed with data passed into it.
+                $.post(url, { newCatName: newCatName, id: id }, function (data) {
+                    var response = data.trim();
+
+                    // notification messages
+                    if (response == "titletaken") {
+                        $this.val(originalTextBoxValue);
+                        ajaxdiv.html("<span class='alert alert-danger'>That title is taken! </span>").show();
+                    } else {
+                        ajaxdiv.html("<span class='alert alert-success'>The category name has been changed </span>");
+                    }
+
+                    // fadeout after 2 seconds and reset the content of the ajaxdiv
+                    setTimeout(function () {
+                        ajaxdiv.fadeOut("fast", function () {
+                            ajaxdiv.html("");
+                        });
+                    }, 2000);
+                    // reset the readonly attribute
+                }).done(function () {
+                    $(this).attr("readonly", true)
+                });
+
+            });
+
+            /////////////////////////////////////////////////////////////////
+
+            
+
+        });
+
+    </script>
+
+}
+

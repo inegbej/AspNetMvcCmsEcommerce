@@ -1,0 +1,112 @@
+﻿@model IEnumerable<CmsShoppingCart.Models.ViewModels.Shop.ProductVM>
+
+@{
+    ViewBag.Title = "Products";
+}
+
+@using PagedList.Mvc;    @*//import this so we get our HTML Helper*@
+@using PagedList;        @*//import this so we can cast our list to IPagedList (only necessary because ViewBag is dynamic)*@
+
+<h2>Products</h2>
+
+<select id="SelectCategory" name="SelectCategory">
+    <option value="0">All</option>
+    @foreach (var item in ViewBag.Categories)
+    {
+        if (ViewBag.SelectedCat == item.Value)
+        {
+            <option selected="selected" value="@item.Value">@item.Text</option>
+        }
+        else
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    }
+
+</select>
+<br /><br />
+<p>
+    @Html.ActionLink("Add New Product", "AddProduct")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            Name
+        </th>
+        <th>
+            Description
+        </th>
+        <th>
+            Price
+        </th>
+        <th>
+            Image Name
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var product in ViewBag.OnePageOfProducts)
+    {
+        <tr>
+            <td>@product.Name</td>
+            <td>@product.Description</td>
+            <td>@product.Price</td>
+            <td>
+                <a href="/admin/shop/EditProduct/@product.Id">
+                    <img src="/Images/Uploads/Products/@product.Id/Thumbs/@product.ImageName" />
+                </a>
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "EditProduct", new { id = product.Id }) |
+                @Html.ActionLink("Delete", "DeleteProduct", new { id = product.Id }, new { @class = "delete" })
+            </td>
+        </tr>
+    }
+
+</table>
+
+<!-- output a paging control that lets the user navigation to the previous page, next page, etc -->
+@Html.PagedListPager((IPagedList)ViewBag.OnePageOfProducts, page => Url.Action("Products", new { page, catId = ViewBag.SelectedCat }))
+
+
+
+@section Scripts {
+
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+    <script>
+
+        $(function () {
+
+            /*
+             * Select product from specified category
+             */
+            $("#SelectCategory").on("change", function () {
+                var url = $(this).val();      // set the url. val() is the option value in this view
+
+                if (url) {   // if we have a url. Do the below
+                    window.location = "/admin/shop/Products?catId=" + url;
+
+                    return false;
+                }
+            });
+
+            /////////////////////////////////////////////////////////////////
+
+
+            /* 
+             * Cornfirm product deletion
+             */
+            $("a.delete").click(function () {
+                if (!confirm("Confirm product deletion")) return false;
+            });
+
+            /////////////////////////////////////////////////////////////////
+        
+
+        });
+
+    </script>
+
+}
+
