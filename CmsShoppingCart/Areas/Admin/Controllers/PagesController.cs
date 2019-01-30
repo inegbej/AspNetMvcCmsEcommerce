@@ -26,12 +26,13 @@ namespace CmsShoppingCart.Areas.Admin.Controllers
             return View(pagesList);
         }
 
-        // GET: Admin/Pages/AddPage
+        // GET: Admin/Pages/AddPage       
         [HttpGet]
         public ActionResult AddPages()
         {
             return View();
         }
+
 
         // POST: Admin/Pages/AddPage
         [HttpPost]
