@@ -7,7 +7,7 @@ using System.Web;
 namespace CmsShoppingCart.Models.ViewModels.Shop
 {
     public class CategoryVM
-    {
+    {       
         public CategoryVM()
         {
         }
